@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/logo.png" width="88" height="88" alt="NanoRp-Creator"><br>
+
 # NanoRp-Creator
 
 **Ультралегкая студия создания ресурс-паков Minecraft, умного исправления четности текстур и генерации постоянных ссылок без API-ключей.**

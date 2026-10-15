@@ -28,6 +28,7 @@ function createWindow() {
         minHeight: 600,
         title: 'NanoRp-Creator v1.0.0 — Resource Pack Studio & Cloud Linker',
         backgroundColor: '#0d131f', // Modern blue-slate dark background
+        icon: path.join(__dirname, '..', 'renderer', 'assets', 'icon.png'),
         show: false,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),

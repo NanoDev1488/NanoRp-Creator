@@ -111,6 +111,16 @@ body {
   color: var(--accent);
 }
 
+.brand-glyph-img {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 1px solid var(--hairline);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+  flex-shrink: 0;
+}
+
 .brand-name {
   font-size: 13.5px;
   font-weight: 600;
