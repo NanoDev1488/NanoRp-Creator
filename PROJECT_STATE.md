@@ -22,6 +22,7 @@
 - [x] CI/CD в GitHub Actions для Windows, Linux, macOS с кэшированием (cargo, npm, cmake).
 - [x] Playwright (Python) тесты со снятием скриншотов на macOS.
 - [x] Release Action со ссылкой на чейнджлог.
+- [x] Релиз v1.0.0 успешно скомпилирован на всех ОС, артефакт NanoRp-Creator.exe скачан на рабочий стол пользователя (C:\Users\nanodev\Desktop\NanoRp-Creator.exe, ~64.8 МБ).
 - [x] Оформление README.md в плиточном стиле с карточками и контактами автора.
 
 ## 4. Правила окружения
