@@ -2,7 +2,7 @@
 name = "nano-rp-rust-engine"
 version = "1.0.0"
 edition = "2021"
-authors = ["NanoDev <t.me/radoqi>"]
+authors = ["NanoDev1488 <t.me/radoqi>"]
 description = "High-performance Rust Engine for NanoRp-Creator: image validation, edge pixel padding and zip packing"
 
 [dependencies]
