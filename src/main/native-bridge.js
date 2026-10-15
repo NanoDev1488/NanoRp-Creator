@@ -164,28 +164,120 @@ async function packZip(sourceDir, outputZip) {
     return fallbackZip(sourceDir, outputZip);
 }
 
-// Fallback ZIP builder using standard archiver or minimal zip header writer
-async function fallbackZip(sourceDir, outputZip) {
-    const archiver = require('archiver');
-    return new Promise((resolve, reject) => {
-        const out = fs.createWriteStream(outputZip);
-        const archive = archiver('zip', { zlib: { level: 9 } });
+// Fast CRC32 calculation for ZIP generator
+const crcTable = new Uint32Array(256);
+for (let i = 0; i < 256; i++) {
+    let c = i;
+    for (let j = 0; j < 8; j++) {
+        c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    }
+    crcTable[i] = c;
+}
 
-        out.on('close', async () => {
+function calculateCrc32(buf) {
+    let crc = 0xFFFFFFFF;
+    for (let i = 0; i < buf.length; i++) {
+        crc = (crc >>> 8) ^ crcTable[(crc ^ buf[i]) & 0xFF];
+    }
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+
+// Zero-dependency pure Node.js ZIP builder (PKZIP 2.0 standard)
+async function fallbackZip(sourceDir, outputZip) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const zlib = require('zlib');
+            const entries = [];
+
+            function walk(current, base = '') {
+                const items = fs.readdirSync(current, { withFileTypes: true });
+                for (const item of items) {
+                    const full = path.join(current, item.name);
+                    const rel = base ? `${base}/${item.name}` : item.name;
+                    if (item.isDirectory()) {
+                        walk(full, rel);
+                    } else if (item.isFile()) {
+                        entries.push({ rel, full, data: fs.readFileSync(full) });
+                    }
+                }
+            }
+            walk(sourceDir);
+
+            const parts = [];
+            const central = [];
+            let offset = 0;
+
+            for (const entry of entries) {
+                const nameBuf = Buffer.from(entry.rel.replace(/\\/g, '/'), 'utf8');
+                const compressed = zlib.deflateRawSync(entry.data, { level: 9 });
+                const crc = calculateCrc32(entry.data);
+
+                // Local file header (30 bytes)
+                const lh = Buffer.alloc(30);
+                lh.writeUInt32LE(0x04034b50, 0); // Local header signature
+                lh.writeUInt16LE(20, 4);          // Version needed (2.0)
+                lh.writeUInt16LE(0x0800, 6);      // UTF-8 flag
+                lh.writeUInt16LE(8, 8);           // Deflate compression
+                lh.writeUInt32LE(0, 10);          // Mod time
+                lh.writeUInt32LE(crc, 14);        // CRC-32
+                lh.writeUInt32LE(compressed.length, 18); // Compressed size
+                lh.writeUInt32LE(entry.data.length, 22); // Uncompressed size
+                lh.writeUInt16LE(nameBuf.length, 26);    // Filename length
+                lh.writeUInt16LE(0, 28);                 // Extra field length
+
+                parts.push(lh, nameBuf, compressed);
+
+                // Central directory header (46 bytes)
+                const cd = Buffer.alloc(46);
+                cd.writeUInt32LE(0x02014b50, 0); // CD signature
+                cd.writeUInt16LE(20, 4);          // Version made by
+                cd.writeUInt16LE(20, 6);          // Version needed
+                cd.writeUInt16LE(0x0800, 8);      // UTF-8 flag
+                cd.writeUInt16LE(8, 10);          // Deflate compression
+                cd.writeUInt32LE(0, 12);          // Mod time
+                cd.writeUInt32LE(crc, 16);        // CRC-32
+                cd.writeUInt32LE(compressed.length, 20); // Compressed size
+                cd.writeUInt32LE(entry.data.length, 24); // Uncompressed size
+                cd.writeUInt16LE(nameBuf.length, 28);    // Filename length
+                cd.writeUInt16LE(0, 30);          // Extra field length
+                cd.writeUInt16LE(0, 32);          // File comment length
+                cd.writeUInt16LE(0, 34);          // Disk number
+                cd.writeUInt16LE(0, 36);          // Internal attributes
+                cd.writeUInt32LE(0x81a40000, 38); // External attributes (regular file)
+                cd.writeUInt32LE(offset, 42);     // Relative offset of local header
+
+                central.push(cd, nameBuf);
+                offset += 30 + nameBuf.length + compressed.length;
+            }
+
+            const cdBuf = Buffer.concat(central);
+
+            // End of central directory record (22 bytes)
+            const eocd = Buffer.alloc(22);
+            eocd.writeUInt32LE(0x06054b50, 0);       // EOCD signature
+            eocd.writeUInt16LE(0, 4);                 // Disk number
+            eocd.writeUInt16LE(0, 6);                 // Disk start
+            eocd.writeUInt16LE(entries.length, 8);    // Entries on disk
+            eocd.writeUInt16LE(entries.length, 10);   // Total entries
+            eocd.writeUInt32LE(cdBuf.length, 12);     // Size of central directory
+            eocd.writeUInt32LE(offset, 16);           // Offset of central directory
+            eocd.writeUInt16LE(0, 20);                // Comment length
+
+            fs.mkdirSync(path.dirname(outputZip), { recursive: true });
+            const finalZip = Buffer.concat([...parts, cdBuf, eocd]);
+            fs.writeFileSync(outputZip, finalZip);
+
             const sha1 = await computeFileSha1(outputZip);
             resolve({
                 success: true,
-                files_packed: archive.pointer(),
-                size_bytes: fs.statSync(outputZip).size,
+                files_packed: entries.length,
+                size_bytes: finalZip.length,
                 sha1,
                 zip_path: outputZip
             });
-        });
-
-        archive.on('error', err => reject(err));
-        archive.pipe(out);
-        archive.directory(sourceDir, false);
-        archive.finalize();
+        } catch (err) {
+            reject(err);
+        }
     });
 }
 
@@ -246,35 +338,74 @@ function fallbackValidatePack(dirPath) {
 }
 
 // Free public host uploaders (No API key needed)
-// 1) TmpFiles.org (Instant direct binary download link)
+// 1) paste.c-net.org (Permanent binary RAW stream / 180 days / 50 MB / No captchas / No Cloudflare blocking)
 // 2) Catbox.moe (Permanent direct hosting)
-// 3) File.io
-async function uploadToPublicHost(filePath, provider = 'tmpfiles') {
+// 3) TmpFiles.org
+async function uploadToPublicHost(filePath, provider = 'cnet') {
     const fileName = path.basename(filePath);
     const fileData = fs.readFileSync(filePath);
     const sha1 = await computeFileSha1(filePath);
 
-    if (provider === 'catbox') {
+    if (provider === 'cnet') {
         try {
-            return await uploadCatbox(fileName, fileData, sha1);
+            return await uploadCNet(fileName, fileData, sha1);
         } catch (e) {
-            console.warn('[Upload] Catbox error, falling back to TmpFiles:', e.message);
-            return await uploadTmpfiles(fileName, fileData, sha1);
+            console.warn('[Upload] paste.c-net.org error, falling back to Catbox:', e.message);
+            return await uploadCatbox(fileName, fileData, sha1);
         }
-    } else if (provider === 'tmpfiles') {
+    } else if (provider === 'catbox') {
         try {
-            return await uploadTmpfiles(fileName, fileData, sha1);
-        } catch (e) {
-            console.warn('[Upload] TmpFiles error, falling back to Catbox:', e.message);
             return await uploadCatbox(fileName, fileData, sha1);
+        } catch (e) {
+            console.warn('[Upload] Catbox error, falling back to c-net:', e.message);
+            return await uploadCNet(fileName, fileData, sha1);
         }
     } else {
         try {
-            return await uploadTmpfiles(fileName, fileData, sha1);
+            return await uploadCNet(fileName, fileData, sha1);
         } catch (e) {
-            return await uploadFileIo(fileName, fileData, sha1);
+            return await uploadTmpfiles(fileName, fileData, sha1);
         }
     }
+}
+
+function uploadCNet(fileName, fileData, sha1) {
+    return new Promise((resolve, reject) => {
+        const req = https.request({
+            hostname: 'paste.c-net.org',
+            path: '/',
+            method: 'PUT',
+            timeout: 25000,
+            headers: {
+                'Content-Type': 'application/octet-stream',
+                'X-FileName': fileName,
+                'Content-Length': fileData.length,
+                'User-Agent': 'NanoRp-Creator/1.0'
+            }
+        }, (res) => {
+            let body = '';
+            res.on('data', d => body += d);
+            res.on('end', () => {
+                const url = body.trim();
+                if (url.startsWith('http')) {
+                    resolve({
+                        success: true,
+                        provider: 'paste.c-net.org (Direct Stream)',
+                        url,
+                        sha1,
+                        direct_url: url
+                    });
+                } else {
+                    reject(new Error(body || 'Failed to upload to paste.c-net.org'));
+                }
+            });
+        });
+
+        req.on('timeout', () => { req.destroy(new Error('paste.c-net.org connection timed out')); });
+        req.on('error', reject);
+        req.write(fileData);
+        req.end();
+    });
 }
 
 function uploadCatbox(fileName, fileData, sha1) {
