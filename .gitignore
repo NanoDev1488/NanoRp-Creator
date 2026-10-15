@@ -6,7 +6,8 @@ yarn-error.log*
 
 # Build Outputs & Packaging
 dist/
-build/
+!build/
+!build/**
 bin/*.exe
 bin/*.dll
 bin/nano-rp-*
