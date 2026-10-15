@@ -13,4 +13,4 @@
   - Настроены GitHub Actions для мультиплатформенной сборки, Playwright-тестов со скриншотами для macOS и релиза.
 - **Статус**: Готово к публикации в публичный репозиторий GitHub.
 - **Патч**: Добавлен package-lock.json и requirements.txt для полноценной работы actions/cache и setup-node/setup-python на всех ОС.
-- **Фикс CI & Автор**: Выставлены официальные реквизиты автора NanoDev_mc (kanalgarila3@gmail.com). Исправлен генератор CMake на Windows (VS2022) и скрипт Playwright (CDP протокол) для гарантированного снятия скриншотов на macOS.
+- **Фикс CI & Автор**: Выставлены официальные реквизиты автора NanoDev_mc (kanalgarila3@gmail.com). Исправлен генератор CMake на Windows (подключен ilammy/msvc-dev-cmd для MSVC) и скрипт Playwright (CDP протокол) для гарантированного снятия скриншотов на macOS.

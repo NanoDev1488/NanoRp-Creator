@@ -46,6 +46,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
+      - name: Setup MSVC Developer Prompt (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Setup CMake & Compiler
         uses: jwlawson/actions-setup-cmake@v2
         with:
@@ -72,13 +76,8 @@ jobs:
       - name: Compile C++ Engine (Release Profile)
         shell: bash
         run: |
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            cmake -B native/cpp-engine/build -S native/cpp-engine -G "Visual Studio 17 2022" -A x64
-            cmake --build native/cpp-engine/build --config Release
-          else
-            cmake -B native/cpp-engine/build -S native/cpp-engine -DCMAKE_BUILD_TYPE=Release
-            cmake --build native/cpp-engine/build --config Release
-          fi
+          cmake -B native/cpp-engine/build -S native/cpp-engine -DCMAKE_BUILD_TYPE=Release
+          cmake --build native/cpp-engine/build --config Release
 
       - name: Copy Native Engines to Binary Directory
         shell: bash
