@@ -1,306 +1,373 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NanoRp-Creator</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NanoRp-Creator</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar">
-        <div class="brand">
-            <div class="brand-icon">⚡</div>
-            <div>
-                <div class="brand-title">NanoRp-Creator</div>
-                <span class="brand-badge">v1.0.0</span>
+  <!-- Sidebar Navigation (Linear Product Style) -->
+  <aside class="sidebar" aria-label="Панель навигации">
+    <div class="sidebar__header">
+      <div class="brand-wrap">
+        <div class="brand-glyph">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+        </div>
+        <span class="brand-name">NanoRp-Creator</span>
+      </div>
+      <span class="version-pill">v1.0.0</span>
+    </div>
+
+    <nav class="sidebar__nav">
+      <div class="nav-section">
+        <span class="nav-section__title">Проект</span>
+        <div class="nav-item active" data-page="page-project">
+          <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          <span>Проект & Облако</span>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <span class="nav-section__title">Ассеты</span>
+        <div class="nav-item" data-page="page-parity">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          <span>Чётность текстур</span>
+        </div>
+        <div class="nav-item" data-page="page-fonts">
+          <svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          <span>Символы & Глифы</span>
+        </div>
+        <div class="nav-item" data-page="page-items">
+          <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          <span>Кастомные модели</span>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <span class="nav-section__title">Система</span>
+        <div class="nav-item" data-page="page-settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Настройки & Автор</span>
+        </div>
+      </div>
+    </nav>
+
+    <div class="sidebar__footer">
+      <div class="stat-row">
+        <span><span class="status-dot"></span><span id="lbl-engine-status">Native Core Active</span></span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-mono" id="lbl-ram-usage">RAM: 42 MB</span>
+        <span class="stat-mono">CPU: 0.1%</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Stage Area -->
+  <main class="main-stage">
+    <div class="view-container">
+
+      <!-- PAGE 1: PROJECT & CLOUD -->
+      <section id="page-project" class="page active">
+        <header class="view-header">
+          <div class="view-title-group">
+            <h1>Управление ресурс-паком</h1>
+            <p>Конфигурация pack.mcmeta, упаковка архива и получение публичной ссылки</p>
+          </div>
+          <div class="header-actions">
+            <button id="btn-select-folder" class="btn btn-secondary">
+              <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              <span>Выбрать директорию</span>
+            </button>
+            <button id="btn-generate-pack" class="btn btn-primary">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Сформировать структуру</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="card-grid-split">
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Параметры pack.mcmeta
+              </span>
             </div>
+
+            <div class="control-group">
+              <label class="control-label" for="inp-pack-name">Имя пакета</label>
+              <input type="text" id="inp-pack-name" class="input-field" value="ServerResourcePack" placeholder="ServerResourcePack">
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="sel-pack-format">Целевой формат версий</label>
+              <select id="sel-pack-format" class="select-field">
+                <option value="48">1.21.2 - 1.21.4 (Формат 48)</option>
+                <option value="34" selected>1.21 - 1.21.1 (Формат 34)</option>
+                <option value="22">1.20.3 - 1.20.4 (Формат 22)</option>
+                <option value="15">1.20 - 1.20.1 (Формат 15)</option>
+                <option value="9">1.19 - 1.19.2 (Формат 9)</option>
+                <option value="6">1.16.2 - 1.16.5 (Формат 6)</option>
+                <option value="3">1.11 - 1.12.2 (Формат 3)</option>
+                <option value="1">1.6.1 - 1.8.9 (Формат 1)</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="inp-pack-desc">Описание (MOTD / Цветовые коды)</label>
+              <textarea id="inp-pack-desc" class="textarea-field" placeholder="§bNanoRp Server Pack §7by §eNanoDev_mc">§bNanoRp Server Pack §7by §eNanoDev_mc</textarea>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">
+                <svg viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+                Экспорт и Cloud Linker
+              </span>
+            </div>
+
+            <p style="font-size: 12px; color: var(--ink-secondary);">
+              Быстрая архивация через нативный движок Rust, потоковый расчёт SHA-1 и заливка на публичные площадки без API-токенов.
+            </p>
+
+            <div style="display: flex; gap: 8px;">
+              <button id="btn-create-zip" class="btn btn-secondary" style="flex: 1;">
+                <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                <span>Упаковать .ZIP</span>
+              </button>
+              <button id="btn-upload-cloud" class="btn btn-primary" style="flex: 1;">
+                <svg viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/></svg>
+                <span>Залить в Облако</span>
+              </button>
+            </div>
+
+            <div id="box-cloud-result" class="output-box" style="display: none;">
+              <div class="output-row">
+                <span class="control-label">URL</span>
+                <span id="res-cloud-url" class="output-value">https://...</span>
+                <button id="btn-copy-url" class="btn btn-secondary btn-sm">Копировать</button>
+              </div>
+
+              <div class="output-row">
+                <span class="control-label">SHA-1</span>
+                <span id="res-cloud-sha1" class="output-value">...</span>
+                <button id="btn-copy-sha1" class="btn btn-secondary btn-sm">Копировать</button>
+              </div>
+
+              <div class="control-group" style="margin-top: 4px;">
+                <span class="control-label">server.properties</span>
+                <pre id="res-server-properties" class="code-pre"></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE 2: PARITY VALIDATOR -->
+      <section id="page-parity" class="page">
+        <header class="view-header">
+          <div class="view-title-group">
+            <h1>Проверка чётности текстур</h1>
+            <p>Minecraft строго требует размеры, кратные двум (16x16, 32x32, 64x64). Авто-расширение краёв (+1px) без деформации спрайтов.</p>
+          </div>
+          <div class="header-actions">
+            <button id="btn-scan-files" class="btn btn-secondary">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span>Выбрать файлы</span>
+            </button>
+            <button id="btn-scan-dir" class="btn btn-secondary">
+              <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              <span>Папка с текстурами</span>
+            </button>
+            <button id="btn-fix-all-images" class="btn btn-accent-subtle" style="display: none;">
+              <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>Расширить все нечётные (+1px)</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="table-panel">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 45%;">Файл</th>
+                <th style="width: 15%;">Разрешение</th>
+                <th style="width: 20%;">Чётность</th>
+                <th style="width: 20%; text-align: right;">Коррекция</th>
+              </tr>
+            </thead>
+            <tbody id="tbl-parity-body">
+              <tr>
+                <td colspan="4" style="text-align: center; padding: 32px; color: var(--ink-tertiary);">
+                  Файлы ещё не загружены. Нажмите «Выбрать файлы» или укажите директорию.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- PAGE 3: FONTS & GLYPHS -->
+      <section id="page-fonts" class="page">
+        <header class="view-header">
+          <div class="view-title-group">
+            <h1>Замена символов на глифы (Шрифты)</h1>
+            <p>Привязка текстовых меток и эмодзи к текстурам через <code>font/default.json</code> для чата, скорбордов и таба</p>
+          </div>
+        </header>
+
+        <div class="panel">
+          <div style="display: grid; grid-template-columns: 1fr 2fr 90px 90px auto; gap: 10px; align-items: flex-end;">
+            <div class="control-group">
+              <label class="control-label" for="inp-font-char">Символ / Шорткод</label>
+              <input type="text" id="inp-font-char" class="input-field" placeholder=":coin:" value=":coin:">
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="inp-font-path">Текстура иконки (.PNG)</label>
+              <div style="display: flex; gap: 6px;">
+                <input type="text" id="inp-font-path" class="input-field" placeholder="Путь к файлу" readonly style="flex: 1;">
+                <button id="btn-font-browse" class="btn btn-secondary btn-sm">Обзор</button>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="inp-font-height">Height</label>
+              <input type="number" id="inp-font-height" class="input-field" value="8" min="1" max="128">
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="inp-font-ascent">Ascent</label>
+              <input type="number" id="inp-font-ascent" class="input-field" value="7" min="-64" max="64">
+            </div>
+            <button id="btn-confirm-add-font" class="btn btn-primary" style="height: 35px;">Добавить</button>
+          </div>
         </div>
 
-        <ul class="nav-links">
-            <li class="nav-item active" data-page="page-project">
-                <span class="icon">📦</span>
-                <span>Проект & Облако</span>
-            </li>
-            <li class="nav-item" data-page="page-parity">
-                <span class="icon">🔍</span>
-                <span>Четность картинок</span>
-            </li>
-            <li class="nav-item" data-page="page-fonts">
-                <span class="icon">🔤</span>
-                <span>Замена символов</span>
-            </li>
-            <li class="nav-item" data-page="page-items">
-                <span class="icon">⚔️</span>
-                <span>Кастомные предметы</span>
-            </li>
-            <li class="nav-item" data-page="page-settings">
-                <span class="icon">⚙️</span>
-                <span>Настройки & Автор</span>
-            </li>
-        </ul>
-
-        <div class="sidebar-footer">
-            <div class="stat-badge">
-                <span class="dot"></span>
-                <span id="lbl-engine-status">Ядро: Нативное C++/Rust</span>
-            </div>
-            <div id="lbl-ram-usage">RAM: 42 MB · CPU: 0.1%</div>
+        <div class="mapping-grid" id="list-font-mappings">
+          <!-- Dynamically populated glyph rows -->
         </div>
-    </aside>
+      </section>
 
-    <!-- Main Content Container -->
-    <main class="content">
-        <!-- PAGE 1: PROJECT & EXPORT & CLOUD -->
-        <section id="page-project" class="page active">
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">📦 Управление ресурс-паком</h1>
-                    <p class="page-subtitle">Конфигурация pack.mcmeta, экспорт в .zip и генерация постоянной ссылки</p>
-                </div>
-                <div style="display:flex; gap:10px;">
-                    <button id="btn-select-folder" class="btn btn-secondary">📁 Выбрать папку пака</button>
-                    <button id="btn-generate-pack" class="btn btn-primary">⚡ Собрать структуру</button>
-                </div>
+      <!-- PAGE 4: CUSTOM MODEL DATA -->
+      <section id="page-items" class="page">
+        <header class="view-header">
+          <div class="view-title-group">
+            <h1>Кастомные предметы (CustomModelData)</h1>
+            <p>Связывание базового предмета Minecraft с кастомной моделью без ручной правки overrides JSON</p>
+          </div>
+        </header>
+
+        <div class="panel">
+          <div style="display: grid; grid-template-columns: 1.2fr 110px 2fr auto; gap: 10px; align-items: flex-end;">
+            <div class="control-group">
+              <label class="control-label" for="inp-item-base">Базовый предмет</label>
+              <input type="text" id="inp-item-base" class="input-field" placeholder="diamond_sword, paper" value="diamond_sword">
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="inp-item-cmd">CustomModelData</label>
+              <input type="number" id="inp-item-cmd" class="input-field" value="1001" min="1" max="9999999">
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="inp-item-path">Файл текстуры / модели</label>
+              <div style="display: flex; gap: 6px;">
+                <input type="text" id="inp-item-path" class="input-field" placeholder="Путь к файлу" readonly style="flex: 1;">
+                <button id="btn-item-browse" class="btn btn-secondary btn-sm">Обзор</button>
+              </div>
+            </div>
+            <button id="btn-confirm-add-item" class="btn btn-primary" style="height: 35px;">Привязать</button>
+          </div>
+        </div>
+
+        <div class="mapping-grid" id="list-item-mappings">
+          <!-- Dynamically populated custom item rows -->
+        </div>
+      </section>
+
+      <!-- PAGE 5: SETTINGS & ABOUT -->
+      <section id="page-settings" class="page">
+        <header class="view-header">
+          <div class="view-title-group">
+            <h1>Параметры & Автор</h1>
+            <p>Настройки компрессии, открытого облака и официальные каналы связи</p>
+          </div>
+        </header>
+
+        <div class="card-grid-split">
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">
+                <svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+                Параметры окружения
+              </span>
             </div>
 
-            <div class="card-grid">
-                <div class="card">
-                    <h3 class="card-title">📝 Параметры pack.mcmeta</h3>
-                    <div class="form-group">
-                        <label>Название ресурс-пака</label>
-                        <input type="text" id="inp-pack-name" value="MyServerPack" placeholder="Название пака">
-                    </div>
-                    <div class="form-group">
-                        <label>Целевая версия Minecraft</label>
-                        <select id="sel-pack-format">
-                            <option value="48">1.21.2 - 1.21.4 (Формат 48)</option>
-                            <option value="34" selected>1.21 - 1.21.1 (Формат 34)</option>
-                            <option value="22">1.20.3 - 1.20.4 (Формат 22)</option>
-                            <option value="15">1.20 - 1.20.1 (Формат 15)</option>
-                            <option value="9">1.19 - 1.19.2 (Формат 9)</option>
-                            <option value="6">1.16.2 - 1.16.5 (Формат 6)</option>
-                            <option value="3">1.11 - 1.12.2 (Формат 3)</option>
-                            <option value="1">1.6.1 - 1.8.9 (Формат 1)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Описание (поддерживает цветовые коды §a, §e, §b)</label>
-                        <textarea id="inp-pack-desc" placeholder="§bСерверный ресурс-пак §7| §aWineSquad">§bNanoRp Server Pack §7by §eNanoDev</textarea>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3 class="card-title">🌐 Постоянная ссылка и Server.properties</h3>
-                    <p style="font-size:12.5px; color:var(--text-muted);">
-                        Упаковывает ресурс-пак в .ZIP, рассчитывает точный SHA-1 хеш и заливает на публичный хостинг без API-ключей.
-                    </p>
-                    <div style="display:flex; gap:8px;">
-                        <button id="btn-create-zip" class="btn btn-secondary" style="flex:1;">📦 Упаковать в ZIP</button>
-                        <button id="btn-upload-cloud" class="btn btn-success" style="flex:1;">☁️ Залить в Облако</button>
-                    </div>
-                    <div id="box-cloud-result" class="result-box" style="display:none;">
-                        <div class="result-row">
-                            <span style="color:var(--text-dim)">Ссылка:</span>
-                            <span id="res-cloud-url" class="result-text">https://...</span>
-                            <button id="btn-copy-url" class="btn btn-secondary btn-sm">Копировать</button>
-                        </div>
-                        <div class="result-row">
-                            <span style="color:var(--text-dim)">SHA-1:</span>
-                            <span id="res-cloud-sha1" class="result-text">abcdef...</span>
-                            <button id="btn-copy-sha1" class="btn btn-secondary btn-sm">Копировать</button>
-                        </div>
-                        <div style="margin-top:6px; font-size:11px; color:var(--text-dim);">
-                            Для <b>server.properties</b>:
-                            <pre id="res-server-properties" style="color:var(--accent); margin-top:4px; user-select:all;"></pre>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- PAGE 2: IMAGE PARITY VALIDATOR & EXTENDER -->
-        <section id="page-parity" class="page">
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">🔍 Проверка четности размеров картинок</h1>
-                    <p class="page-subtitle">Minecraft строго требует кратные 2 размеры (16x16, 32x32, 64x64). Умное доращивание края без искажения спрайта.</p>
-                </div>
-                <div style="display:flex; gap:10px;">
-                    <button id="btn-scan-files" class="btn btn-secondary">🖼️ Выбрать картинки</button>
-                    <button id="btn-scan-dir" class="btn btn-secondary">📁 Сканировать папку</button>
-                    <button id="btn-fix-all-images" class="btn btn-warning" style="display:none;">⚡ Исправить ВСЕ нечетные (+1px)</button>
-                </div>
+            <div class="control-group">
+              <label class="control-label" for="sel-cloud-provider">Сервис публичного хостинга</label>
+              <select id="sel-cloud-provider" class="select-field">
+                <option value="catbox" selected>Litterbox Catbox (72h / Permanent)</option>
+                <option value="0x0">0x0.st (The Null Pointer)</option>
+                <option value="fileio">File.io (Temporary File Exchanger)</option>
+              </select>
             </div>
 
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 45%;">Файл</th>
-                            <th style="width: 15%;">Размер (Ш x В)</th>
-                            <th style="width: 20%;">Статус четности</th>
-                            <th style="width: 20%;">Действие</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbl-parity-body">
-                        <tr>
-                            <td colspan="4" style="text-align:center; padding:30px; color:var(--text-dim);">
-                                Картинки еще не добавлены. Нажмите "Выбрать картинки" или "Сканировать папку".
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="control-group">
+              <label class="control-label" for="sel-auto-fix">Авто-выравнивание чётности</label>
+              <select id="sel-auto-fix" class="select-field">
+                <option value="ask" selected>Запрашивать подтверждение</option>
+                <option value="auto">Автоматически расширять нечётные на +1px</option>
+              </select>
             </div>
-        </section>
 
-        <!-- PAGE 3: FONT & SYMBOL REPLACEMENT -->
-        <section id="page-fonts" class="page">
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">🔤 Замена текста на картинку / Emoji</h1>
-                    <p class="page-subtitle">Визуальная замена символов в чате, скорбордах и табе на кастомные иконки (font/default.json)</p>
+            <div class="control-group">
+              <label class="control-label" for="sel-zip-level">Уровень сжатия архива</label>
+              <select id="sel-zip-level" class="select-field">
+                <option value="9" selected>9 (Максимальный Deflate для серверов)</option>
+                <option value="5">5 (Стандартный)</option>
+                <option value="0">0 (Store без сжатия)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Разработчик & Связь
+              </span>
+            </div>
+
+            <p style="font-size: 12px; color: var(--ink-secondary); line-height: 1.55;">
+              Специально оптимизированная сборка для слабых ПК с низким потреблением ОЗУ.
+              Разработчик: <b>NanoDev_mc</b> (NanoDev1488).
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
+              <div class="contact-link" id="link-feedback">
+                <div class="contact-meta">
+                  <span class="contact-name">Обратная связь и предложения</span>
+                  <span class="contact-handle">t.me/radoqi</span>
                 </div>
-                <button id="btn-add-font-entry" class="btn btn-primary">+ Добавить символ</button>
-            </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+              </div>
 
-            <div class="card">
-                <div style="display:grid; grid-template-columns: 1fr 2fr 100px 100px auto; gap:10px; align-items:flex-end;">
-                    <div class="form-group">
-                        <label>Символ / Юникод</label>
-                        <input type="text" id="inp-font-char" placeholder=":coin: или \uE001" value=":coin:">
-                    </div>
-                    <div class="form-group">
-                        <label>Файл иконки (PNG)</label>
-                        <div style="display:flex; gap:6px;">
-                            <input type="text" id="inp-font-path" placeholder="Путь к файлу" readonly style="flex:1;">
-                            <button id="btn-font-browse" class="btn btn-secondary btn-sm">Обзор</button>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Высота (Height)</label>
-                        <input type="number" id="inp-font-height" value="8" min="1" max="128">
-                    </div>
-                    <div class="form-group">
-                        <label>Подъем (Ascent)</label>
-                        <input type="number" id="inp-font-ascent" value="7" min="-64" max="64">
-                    </div>
-                    <button id="btn-confirm-add-font" class="btn btn-success" style="height:36px;">Сохранить</button>
+              <div class="contact-link" id="link-channel">
+                <div class="contact-meta">
+                  <span class="contact-name">Официальный канал WineSquad</span>
+                  <span class="contact-handle">t.me/WineSquad</span>
                 </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <div class="mapping-list" id="list-font-mappings">
-                <!-- Dynamically rendered font glyph rows -->
-            </div>
-        </section>
+    </div>
+  </main>
 
-        <!-- PAGE 4: CUSTOM MODEL DATA & ITEMS -->
-        <section id="page-items" class="page">
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">⚔️ Кастомные предметы (CustomModelData)</h1>
-                    <p class="page-subtitle">Сопоставление базового предмета Minecraft с кастомной текстурой без ручной правки JSON overrides</p>
-                </div>
-                <button id="btn-add-item-entry" class="btn btn-primary">+ Привязать предмет</button>
-            </div>
-
-            <div class="card">
-                <div style="display:grid; grid-template-columns: 1fr 120px 2fr auto; gap:10px; align-items:flex-end;">
-                    <div class="form-group">
-                        <label>Базовый предмет Minecraft</label>
-                        <input type="text" id="inp-item-base" placeholder="diamond_sword, paper, stick" value="diamond_sword">
-                    </div>
-                    <div class="form-group">
-                        <label>CustomModelData (ID)</label>
-                        <input type="number" id="inp-item-cmd" value="1001" min="1" max="9999999">
-                    </div>
-                    <div class="form-group">
-                        <label>Файл текстуры / модели</label>
-                        <div style="display:flex; gap:6px;">
-                            <input type="text" id="inp-item-path" placeholder="Путь к PNG/JSON" readonly style="flex:1;">
-                            <button id="btn-item-browse" class="btn btn-secondary btn-sm">Обзор</button>
-                        </div>
-                    </div>
-                    <button id="btn-confirm-add-item" class="btn btn-success" style="height:36px;">Привязать</button>
-                </div>
-            </div>
-
-            <div class="mapping-list" id="list-item-mappings">
-                <!-- Dynamically rendered custom item rows -->
-            </div>
-        </section>
-
-        <!-- PAGE 5: SETTINGS & ABOUT -->
-        <section id="page-settings" class="page">
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">⚙️ Настройки и Обратная связь</h1>
-                    <p class="page-subtitle">Тонкая настройка компрессии, открытого облака и прямые контакты с автором</p>
-                </div>
-            </div>
-
-            <div class="card-grid">
-                <div class="card">
-                    <h3 class="card-title">🔧 Параметры упаковки и облака</h3>
-                    <div class="form-group">
-                        <label>Сервис открытой загрузки (Без API-ключа)</label>
-                        <select id="sel-cloud-provider">
-                            <option value="catbox" selected>Litterbox Catbox (Надежный, до 72 часов/permanent)</option>
-                            <option value="0x0">0x0.st The Null Pointer (Сверхбыстрый прямой хост)</option>
-                            <option value="fileio">File.io (Временный обменник)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Автоматическое исправление четности</label>
-                        <select id="sel-auto-fix">
-                            <option value="ask" selected>Спрашивать перед расширением</option>
-                            <option value="auto">Автоматически расширять нечетные на +1px</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Уровень сжатия архива ZIP</label>
-                        <select id="sel-zip-level">
-                            <option value="9" selected>9 (Максимальное сжатие для быстрого скачивания игроками)</option>
-                            <option value="5">5 (Сбалансированное)</option>
-                            <option value="0">0 (Без сжатия / Store)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3 class="card-title">💬 Автор & Сообщество</h3>
-                    <p style="font-size:12.5px; color:var(--text-muted); line-height:1.6;">
-                        Разработано <b>NanoDev</b> (Nonames). Проект оптимизирован специально под слабые ПК с экстремально низким потреблением оперативной памяти и нативным ускорением на C++ и Rust.
-                    </p>
-
-                    <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
-                        <div class="contact-card" id="link-feedback">
-                            <div class="contact-info">
-                                <span class="contact-icon">✈️</span>
-                                <div>
-                                    <div style="font-weight:700; font-size:13px;">Обратная связь и предложения</div>
-                                    <div style="font-size:11.5px; color:var(--accent);">t.me/radoqi</div>
-                                </div>
-                            </div>
-                            <span style="font-size:16px; color:var(--text-dim);">↗</span>
-                        </div>
-
-                        <div class="contact-card" id="link-channel">
-                            <div class="contact-info">
-                                <span class="contact-icon">🍷</span>
-                                <div>
-                                    <div style="font-weight:700; font-size:13px;">Официальный канал WineSquad</div>
-                                    <div style="font-size:11.5px; color:var(--accent);">t.me/WineSquad</div>
-                                </div>
-                            </div>
-                            <span style="font-size:16px; color:var(--text-dim);">↗</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <script src="js/renderer.js"></script>
+  <script src="js/renderer.js"></script>
 </body>
 </html>

@@ -180,7 +180,7 @@ function renderParityTable() {
     const fixAllBtn = document.getElementById('btn-fix-all-images');
 
     if (parityImages.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--text-dim);">Картинки не выбраны</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 32px; color: var(--ink-tertiary);">Файлы не выбраны</td></tr>`;
         fixAllBtn.style.display = 'none';
         return;
     }
@@ -191,19 +191,22 @@ function renderParityTable() {
     tbody.innerHTML = parityImages.map((img, idx) => {
         const fileName = img.path.split(/[\\/]/).pop();
         const statusBadge = img.valid
-            ? `<span class="badge badge-even">✓ Четный (Кратный 2)</span>`
-            : `<span class="badge badge-odd">⚠ Нечетный (${img.width}x${img.height})</span>`;
+            ? `<span class="parity-badge parity-badge--even"><span class="parity-badge__dot"></span>Чётный</span>`
+            : `<span class="parity-badge parity-badge--odd"><span class="parity-badge__dot"></span>Нечётный</span>`;
 
         const actionBtn = img.valid
-            ? `<span style="color:var(--text-dim); font-size:11px;">Корректно</span>`
-            : `<button class="btn btn-warning btn-sm" onclick="fixSingleImage(${idx})">⚡ Расширить на +1px (До ${img.suggested_w}x${img.suggested_h})</button>`;
+            ? `<span style="color: var(--ink-muted); font-size: 11px; font-family: var(--font-mono);">OK</span>`
+            : `<button class="btn btn-secondary btn-sm" onclick="fixSingleImage(${idx})">Расширить до ${img.suggested_w}×${img.suggested_h}</button>`;
 
         return `
             <tr>
-                <td title="${img.path}"><b>${fileName}</b><br><small style="color:var(--text-dim)">${img.path}</small></td>
-                <td><code>${img.width} × ${img.height} px</code></td>
+                <td>
+                    <div style="font-weight: 600; color: var(--ink-primary);">${fileName}</div>
+                    <div style="font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-tertiary); overflow: hidden; text-overflow: ellipsis; max-width: 320px;">${img.path}</div>
+                </td>
+                <td><span style="font-family: var(--font-mono); font-variant-numeric: tabular-nums;">${img.width} × ${img.height}</span></td>
                 <td>${statusBadge}</td>
-                <td>${actionBtn}</td>
+                <td style="text-align: right;">${actionBtn}</td>
             </tr>
         `;
     }).join('');
@@ -260,18 +263,18 @@ document.getElementById('btn-confirm-add-font').addEventListener('click', () => 
 function renderFontList() {
     const container = document.getElementById('list-font-mappings');
     if (fontMappings.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-dim);">Символы пока не добавлены</div>`;
+        container.innerHTML = `<div style="text-align: center; padding: 24px; color: var(--ink-tertiary); font-size: 12px;">Символы пока не добавлены</div>`;
         return;
     }
 
     container.innerHTML = fontMappings.map((f, i) => `
-        <div class="mapping-row">
-            <img class="thumb" src="file://${f.imagePath.replace(/\\/g, '/')}" alt="glyph">
-            <div class="mapping-info">
-                <div class="mapping-title">Символ в чате: <code style="color:var(--accent); font-weight:700;">${f.symbol}</code></div>
-                <div class="mapping-desc">Высота: ${f.height}px | Подъем: ${f.ascent}px | Файл: ${f.imagePath.split(/[\\/]/).pop()}</div>
+        <div class="mapping-card">
+            <img class="mapping-thumb" src="file://${f.imagePath.replace(/\\/g, '/')}" alt="glyph">
+            <div class="mapping-details">
+                <div class="mapping-title">Символ: <code style="color: var(--accent);">${f.symbol}</code></div>
+                <div class="mapping-meta">Размер: ${f.height}px · Подъём: ${f.ascent}px · ${f.imagePath.split(/[\\/]/).pop()}</div>
             </div>
-            <button class="btn btn-danger btn-sm" onclick="removeFont(${i})">Удалить</button>
+            <button class="btn btn-danger-subtle btn-sm" onclick="removeFont(${i})">Удалить</button>
         </div>
     `).join('');
 }
@@ -309,18 +312,18 @@ document.getElementById('btn-confirm-add-item').addEventListener('click', () => 
 function renderItemList() {
     const container = document.getElementById('list-item-mappings');
     if (itemMappings.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-dim);">Кастомные предметы еще не привязаны</div>`;
+        container.innerHTML = `<div style="text-align: center; padding: 24px; color: var(--ink-tertiary); font-size: 12px;">Кастомные предметы не добавлены</div>`;
         return;
     }
 
     container.innerHTML = itemMappings.map((it, i) => `
-        <div class="mapping-row">
-            <img class="thumb" src="file://${it.imagePath.replace(/\\/g, '/')}" alt="item">
-            <div class="mapping-info">
-                <div class="mapping-title">Базовый предмет: <b>minecraft:${it.baseItem}</b></div>
-                <div class="mapping-desc">CustomModelData: <code style="color:var(--accent);">${it.cmd}</code> | Текстура: ${it.imagePath.split(/[\\/]/).pop()}</div>
+        <div class="mapping-card">
+            <img class="mapping-thumb" src="file://${it.imagePath.replace(/\\/g, '/')}" alt="item">
+            <div class="mapping-details">
+                <div class="mapping-title">minecraft:<b>${it.baseItem}</b></div>
+                <div class="mapping-meta">CustomModelData: <span style="color: var(--accent);">${it.cmd}</span> · ${it.imagePath.split(/[\\/]/).pop()}</div>
             </div>
-            <button class="btn btn-danger btn-sm" onclick="removeItem(${i})">Удалить</button>
+            <button class="btn btn-danger-subtle btn-sm" onclick="removeItem(${i})">Удалить</button>
         </div>
     `).join('');
 }
