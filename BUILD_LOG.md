@@ -14,3 +14,4 @@
 - **Статус**: Готово к публикации в публичный репозиторий GitHub.
 - **Патч**: Добавлен package-lock.json и requirements.txt для полноценной работы actions/cache и setup-node/setup-python на всех ОС.
 - **Фикс CI & Автор**: Выставлены официальные реквизиты автора NanoDev_mc (kanalgarila3@gmail.com). Исправлен генератор CMake на Windows (подключен ilammy/msvc-dev-cmd для MSVC) и скрипт Playwright (CDP протокол) для гарантированного снятия скриншотов на macOS.
+- **Единый мастер-воркфлоу**: Все 3 разрозненных workflow объединены в один главный `main.yml` ("NanoRp-Creator Pipeline") с подджобами: macOS UI Preview (Playwright), Build Matrix (Windows cmd, Ubuntu, macOS) и Publish GitHub Release. Устранён конфликт линкера на Windows.
