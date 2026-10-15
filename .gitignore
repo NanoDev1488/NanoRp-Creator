@@ -1,0 +1,39 @@
+# Node.js & Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build Outputs & Packaging
+dist/
+build/
+bin/*.exe
+bin/*.dll
+bin/nano-rp-*
+
+# Rust Build Artifacts
+native/rust-engine/target/
+native/rust-engine/Cargo.lock
+
+# C++ Build Artifacts
+native/cpp-engine/build/
+native/cpp-engine/CMakeCache.txt
+native/cpp-engine/CMakeFiles/
+*.obj
+*.o
+*.pdb
+
+# Temporary & Editor Caches
+.vscode/
+.idea/
+*.swp
+*.bak
+*.tmp
+*.log
+screenshots/
+__pycache__/
+*.pyc
+
+# OS Files
+Thumbs.db
+.DS_Store

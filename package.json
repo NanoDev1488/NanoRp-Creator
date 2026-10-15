@@ -1,0 +1,81 @@
+{
+  "name": "nano-rp-creator",
+  "version": "1.0.0",
+  "description": "Ultra-lightweight Minecraft Resource Pack Studio, Image Parity Expander & Instant Cloud Linker",
+  "main": "src/main/main.js",
+  "homepage": "https://github.com/NanoDev1488/NanoRp-Creator",
+  "author": {
+    "name": "NanoDev",
+    "url": "https://t.me/WineSquad"
+  },
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux AppImage",
+    "dist:mac": "electron-builder --mac dmg",
+    "build:rust": "cargo build --release --manifest-path native/rust-engine/Cargo.toml",
+    "build:cpp": "cmake -B native/cpp-engine/build -S native/cpp-engine && cmake --build native/cpp-engine/build --config Release"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.nanodev.nanorpcreator",
+    "productName": "NanoRp-Creator",
+    "afterPack": "scripts/debloat-package.js",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "bin/**/*",
+      "package.json",
+      "node_modules/**/*",
+      "!native/**/*",
+      "!scripts/**/*",
+      "!build/**/*",
+      "!dist/**/*",
+      "!**/.git/**",
+      "!**/.github/**",
+      "!**/target/**",
+      "!**/cmake-build-*/**",
+      "!**/*.bak",
+      "!**/*.tmp",
+      "!**/*.log",
+      "!**/.cache/**",
+      "!**/node_modules/*/{test,tests,__tests__,examples,example,docs}/**",
+      "!**/node_modules/**/*.map",
+      "!**/node_modules/**/*.d.ts"
+    ],
+    "win": {
+      "target": ["portable", "nsis"],
+      "artifactName": "NanoRp-Creator-${version}-Windows-x64.${ext}",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "linux": {
+      "target": ["AppImage", "tar.gz"],
+      "category": "Development",
+      "artifactName": "NanoRp-Creator-${version}-Linux-x64.${ext}"
+    },
+    "mac": {
+      "target": ["dmg", "zip"],
+      "category": "public.app-category.developer-tools",
+      "artifactName": "NanoRp-Creator-${version}-macOS-x64.${ext}",
+      "hardenedRuntime": false
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "deleteAppDataOnUninstall": false
+    }
+  }
+}

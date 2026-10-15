@@ -1,0 +1,21 @@
+[package]
+name = "nano-rp-rust-engine"
+version = "1.0.0"
+edition = "2021"
+authors = ["NanoDev <t.me/radoqi>"]
+description = "High-performance Rust Engine for NanoRp-Creator: image validation, edge pixel padding and zip packing"
+
+[dependencies]
+image = { version = "0.25", default-features = false, features = ["png"] }
+zip = { version = "2.1", default-features = false, features = ["deflate"] }
+sha1 = "0.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+walkdir = "2.5"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

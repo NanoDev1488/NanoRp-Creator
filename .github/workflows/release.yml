@@ -1,0 +1,153 @@
+name: Create Multi-Platform Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name for release (e.g. v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  release-build:
+    name: Build & Package Release (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            native/rust-engine/target/
+          key: ${{ runner.os }}-cargo-release-${{ hashFiles('native/rust-engine/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-release-
+
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.28.x'
+
+      - name: Cache C++ Build
+        uses: actions/cache@v4
+        with:
+          path: native/cpp-engine/build/
+          key: ${{ runner.os }}-cmake-release-${{ hashFiles('native/cpp-engine/CMakeLists.txt', 'native/cpp-engine/src/**') }}
+          restore-keys: |
+            ${{ runner.os }}-cmake-release-
+
+      - name: Install Linux Dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libarchive-tools build-essential libfuse2
+
+      - name: Compile Native Engines
+        shell: bash
+        run: |
+          cargo build --release --manifest-path native/rust-engine/Cargo.toml
+          cmake -B native/cpp-engine/build -S native/cpp-engine -DCMAKE_BUILD_TYPE=Release
+          cmake --build native/cpp-engine/build --config Release
+          mkdir -p bin
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            cp native/rust-engine/target/release/nano-rp-rust-engine.exe bin/ || true
+            cp native/cpp-engine/build/Release/nano-rp-cpp-engine.exe bin/ || cp native/cpp-engine/build/nano-rp-cpp-engine.exe bin/ || true
+          else
+            cp native/rust-engine/target/release/nano-rp-rust-engine bin/ || true
+            cp native/cpp-engine/build/nano-rp-cpp-engine bin/ || true
+            chmod +x bin/* || true
+          fi
+
+      - name: Install Node Modules
+        run: npm ci
+
+      - name: Build and Debloat Release Package
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            npm run dist:win -- --publish never
+          elif [ "${{ runner.os }}" = "Linux" ]; then
+            npm run dist:linux -- --publish never
+          elif [ "${{ runner.os }}" = "macOS" ]; then
+            npm run dist:mac -- --publish never
+          fi
+
+      - name: Upload Release Binaries to Job Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts-${{ runner.os }}
+          path: |
+            dist/*.exe
+            dist/*.AppImage
+            dist/*.dmg
+            dist/*.zip
+            dist/*.tar.gz
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: release-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Download All Release Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-dist/
+
+      - name: Prepare Release Directory
+        run: |
+          mkdir -p release-files
+          find all-dist -type f \( -name "*.exe" -o -name "*.AppImage" -o -name "*.dmg" -o -name "*.zip" -o -name "*.tar.gz" \) -exec cp {} release-files/ \;
+          ls -la release-files/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag_name || github.ref_name }}
+          name: NanoRp-Creator ${{ github.event.inputs.tag_name || github.ref_name }}
+          body: |
+            ## ⚡ NanoRp-Creator Release
+
+            Сверхлегкая кроссплатформенная студия для создания серверных и клиентских ресурс-паков Minecraft с нативными C++ и Rust движками.
+
+            ### 💎 Что нового в этой версии:
+            - **C++17 & Rust Engines**: молниеносная валидация текстур, расчет SHA-1 и упаковка ZIP архивов в обход Node.js event-loop.
+            - **Интеллектуальная проверка четности (Parity Extender)**: автоматическое распознавание нечетных картинок (63x64, 31x32) и кнопка умного расширения на +1px без искажения пиксель-арта.
+            - **Конфигуратор глифов и шрифтов**: визуальная замена текста на иконки и эмодзи (`assets/minecraft/font/default.json`) без ручного редактирования JSON.
+            - **Кастомные предметы (CustomModelData)**: сопоставление предметов с моделями и текстурами в один клик.
+            - **Облачный линкер без API-ключей**: генерация постоянной ссылки и готовой строки для `server.properties` (`resource-pack=...` и `resource-pack-sha1=...`).
+            - **35-этапный Debloater сборки**: ультра-низкое потребление RAM (&lt;50 MB) и удаление сотен мегабайт мусора Chromium.
+
+            ### 💬 Обратная связь и автор:
+            - **Обратная связь**: [t.me/radoqi](https://t.me/radoqi)
+            - **Telegram канал**: [t.me/WineSquad](https://t.me/WineSquad)
+          files: release-files/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

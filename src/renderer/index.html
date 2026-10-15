@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NanoRp-Creator</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">⚡</div>
+            <div>
+                <div class="brand-title">NanoRp-Creator</div>
+                <span class="brand-badge">v1.0.0</span>
+            </div>
+        </div>
+
+        <ul class="nav-links">
+            <li class="nav-item active" data-page="page-project">
+                <span class="icon">📦</span>
+                <span>Проект & Облако</span>
+            </li>
+            <li class="nav-item" data-page="page-parity">
+                <span class="icon">🔍</span>
+                <span>Четность картинок</span>
+            </li>
+            <li class="nav-item" data-page="page-fonts">
+                <span class="icon">🔤</span>
+                <span>Замена символов</span>
+            </li>
+            <li class="nav-item" data-page="page-items">
+                <span class="icon">⚔️</span>
+                <span>Кастомные предметы</span>
+            </li>
+            <li class="nav-item" data-page="page-settings">
+                <span class="icon">⚙️</span>
+                <span>Настройки & Автор</span>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="stat-badge">
+                <span class="dot"></span>
+                <span id="lbl-engine-status">Ядро: Нативное C++/Rust</span>
+            </div>
+            <div id="lbl-ram-usage">RAM: 42 MB · CPU: 0.1%</div>
+        </div>
+    </aside>
+
+    <!-- Main Content Container -->
+    <main class="content">
+        <!-- PAGE 1: PROJECT & EXPORT & CLOUD -->
+        <section id="page-project" class="page active">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">📦 Управление ресурс-паком</h1>
+                    <p class="page-subtitle">Конфигурация pack.mcmeta, экспорт в .zip и генерация постоянной ссылки</p>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button id="btn-select-folder" class="btn btn-secondary">📁 Выбрать папку пака</button>
+                    <button id="btn-generate-pack" class="btn btn-primary">⚡ Собрать структуру</button>
+                </div>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3 class="card-title">📝 Параметры pack.mcmeta</h3>
+                    <div class="form-group">
+                        <label>Название ресурс-пака</label>
+                        <input type="text" id="inp-pack-name" value="MyServerPack" placeholder="Название пака">
+                    </div>
+                    <div class="form-group">
+                        <label>Целевая версия Minecraft</label>
+                        <select id="sel-pack-format">
+                            <option value="48">1.21.2 - 1.21.4 (Формат 48)</option>
+                            <option value="34" selected>1.21 - 1.21.1 (Формат 34)</option>
+                            <option value="22">1.20.3 - 1.20.4 (Формат 22)</option>
+                            <option value="15">1.20 - 1.20.1 (Формат 15)</option>
+                            <option value="9">1.19 - 1.19.2 (Формат 9)</option>
+                            <option value="6">1.16.2 - 1.16.5 (Формат 6)</option>
+                            <option value="3">1.11 - 1.12.2 (Формат 3)</option>
+                            <option value="1">1.6.1 - 1.8.9 (Формат 1)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Описание (поддерживает цветовые коды §a, §e, §b)</label>
+                        <textarea id="inp-pack-desc" placeholder="§bСерверный ресурс-пак §7| §aWineSquad">§bNanoRp Server Pack §7by §eNanoDev</textarea>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">🌐 Постоянная ссылка и Server.properties</h3>
+                    <p style="font-size:12.5px; color:var(--text-muted);">
+                        Упаковывает ресурс-пак в .ZIP, рассчитывает точный SHA-1 хеш и заливает на публичный хостинг без API-ключей.
+                    </p>
+                    <div style="display:flex; gap:8px;">
+                        <button id="btn-create-zip" class="btn btn-secondary" style="flex:1;">📦 Упаковать в ZIP</button>
+                        <button id="btn-upload-cloud" class="btn btn-success" style="flex:1;">☁️ Залить в Облако</button>
+                    </div>
+                    <div id="box-cloud-result" class="result-box" style="display:none;">
+                        <div class="result-row">
+                            <span style="color:var(--text-dim)">Ссылка:</span>
+                            <span id="res-cloud-url" class="result-text">https://...</span>
+                            <button id="btn-copy-url" class="btn btn-secondary btn-sm">Копировать</button>
+                        </div>
+                        <div class="result-row">
+                            <span style="color:var(--text-dim)">SHA-1:</span>
+                            <span id="res-cloud-sha1" class="result-text">abcdef...</span>
+                            <button id="btn-copy-sha1" class="btn btn-secondary btn-sm">Копировать</button>
+                        </div>
+                        <div style="margin-top:6px; font-size:11px; color:var(--text-dim);">
+                            Для <b>server.properties</b>:
+                            <pre id="res-server-properties" style="color:var(--accent); margin-top:4px; user-select:all;"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 2: IMAGE PARITY VALIDATOR & EXTENDER -->
+        <section id="page-parity" class="page">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">🔍 Проверка четности размеров картинок</h1>
+                    <p class="page-subtitle">Minecraft строго требует кратные 2 размеры (16x16, 32x32, 64x64). Умное доращивание края без искажения спрайта.</p>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button id="btn-scan-files" class="btn btn-secondary">🖼️ Выбрать картинки</button>
+                    <button id="btn-scan-dir" class="btn btn-secondary">📁 Сканировать папку</button>
+                    <button id="btn-fix-all-images" class="btn btn-warning" style="display:none;">⚡ Исправить ВСЕ нечетные (+1px)</button>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 45%;">Файл</th>
+                            <th style="width: 15%;">Размер (Ш x В)</th>
+                            <th style="width: 20%;">Статус четности</th>
+                            <th style="width: 20%;">Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbl-parity-body">
+                        <tr>
+                            <td colspan="4" style="text-align:center; padding:30px; color:var(--text-dim);">
+                                Картинки еще не добавлены. Нажмите "Выбрать картинки" или "Сканировать папку".
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- PAGE 3: FONT & SYMBOL REPLACEMENT -->
+        <section id="page-fonts" class="page">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">🔤 Замена текста на картинку / Emoji</h1>
+                    <p class="page-subtitle">Визуальная замена символов в чате, скорбордах и табе на кастомные иконки (font/default.json)</p>
+                </div>
+                <button id="btn-add-font-entry" class="btn btn-primary">+ Добавить символ</button>
+            </div>
+
+            <div class="card">
+                <div style="display:grid; grid-template-columns: 1fr 2fr 100px 100px auto; gap:10px; align-items:flex-end;">
+                    <div class="form-group">
+                        <label>Символ / Юникод</label>
+                        <input type="text" id="inp-font-char" placeholder=":coin: или \uE001" value=":coin:">
+                    </div>
+                    <div class="form-group">
+                        <label>Файл иконки (PNG)</label>
+                        <div style="display:flex; gap:6px;">
+                            <input type="text" id="inp-font-path" placeholder="Путь к файлу" readonly style="flex:1;">
+                            <button id="btn-font-browse" class="btn btn-secondary btn-sm">Обзор</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Высота (Height)</label>
+                        <input type="number" id="inp-font-height" value="8" min="1" max="128">
+                    </div>
+                    <div class="form-group">
+                        <label>Подъем (Ascent)</label>
+                        <input type="number" id="inp-font-ascent" value="7" min="-64" max="64">
+                    </div>
+                    <button id="btn-confirm-add-font" class="btn btn-success" style="height:36px;">Сохранить</button>
+                </div>
+            </div>
+
+            <div class="mapping-list" id="list-font-mappings">
+                <!-- Dynamically rendered font glyph rows -->
+            </div>
+        </section>
+
+        <!-- PAGE 4: CUSTOM MODEL DATA & ITEMS -->
+        <section id="page-items" class="page">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">⚔️ Кастомные предметы (CustomModelData)</h1>
+                    <p class="page-subtitle">Сопоставление базового предмета Minecraft с кастомной текстурой без ручной правки JSON overrides</p>
+                </div>
+                <button id="btn-add-item-entry" class="btn btn-primary">+ Привязать предмет</button>
+            </div>
+
+            <div class="card">
+                <div style="display:grid; grid-template-columns: 1fr 120px 2fr auto; gap:10px; align-items:flex-end;">
+                    <div class="form-group">
+                        <label>Базовый предмет Minecraft</label>
+                        <input type="text" id="inp-item-base" placeholder="diamond_sword, paper, stick" value="diamond_sword">
+                    </div>
+                    <div class="form-group">
+                        <label>CustomModelData (ID)</label>
+                        <input type="number" id="inp-item-cmd" value="1001" min="1" max="9999999">
+                    </div>
+                    <div class="form-group">
+                        <label>Файл текстуры / модели</label>
+                        <div style="display:flex; gap:6px;">
+                            <input type="text" id="inp-item-path" placeholder="Путь к PNG/JSON" readonly style="flex:1;">
+                            <button id="btn-item-browse" class="btn btn-secondary btn-sm">Обзор</button>
+                        </div>
+                    </div>
+                    <button id="btn-confirm-add-item" class="btn btn-success" style="height:36px;">Привязать</button>
+                </div>
+            </div>
+
+            <div class="mapping-list" id="list-item-mappings">
+                <!-- Dynamically rendered custom item rows -->
+            </div>
+        </section>
+
+        <!-- PAGE 5: SETTINGS & ABOUT -->
+        <section id="page-settings" class="page">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">⚙️ Настройки и Обратная связь</h1>
+                    <p class="page-subtitle">Тонкая настройка компрессии, открытого облака и прямые контакты с автором</p>
+                </div>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3 class="card-title">🔧 Параметры упаковки и облака</h3>
+                    <div class="form-group">
+                        <label>Сервис открытой загрузки (Без API-ключа)</label>
+                        <select id="sel-cloud-provider">
+                            <option value="catbox" selected>Litterbox Catbox (Надежный, до 72 часов/permanent)</option>
+                            <option value="0x0">0x0.st The Null Pointer (Сверхбыстрый прямой хост)</option>
+                            <option value="fileio">File.io (Временный обменник)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Автоматическое исправление четности</label>
+                        <select id="sel-auto-fix">
+                            <option value="ask" selected>Спрашивать перед расширением</option>
+                            <option value="auto">Автоматически расширять нечетные на +1px</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Уровень сжатия архива ZIP</label>
+                        <select id="sel-zip-level">
+                            <option value="9" selected>9 (Максимальное сжатие для быстрого скачивания игроками)</option>
+                            <option value="5">5 (Сбалансированное)</option>
+                            <option value="0">0 (Без сжатия / Store)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">💬 Автор & Сообщество</h3>
+                    <p style="font-size:12.5px; color:var(--text-muted); line-height:1.6;">
+                        Разработано <b>NanoDev</b> (Nonames). Проект оптимизирован специально под слабые ПК с экстремально низким потреблением оперативной памяти и нативным ускорением на C++ и Rust.
+                    </p>
+
+                    <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
+                        <div class="contact-card" id="link-feedback">
+                            <div class="contact-info">
+                                <span class="contact-icon">✈️</span>
+                                <div>
+                                    <div style="font-weight:700; font-size:13px;">Обратная связь и предложения</div>
+                                    <div style="font-size:11.5px; color:var(--accent);">t.me/radoqi</div>
+                                </div>
+                            </div>
+                            <span style="font-size:16px; color:var(--text-dim);">↗</span>
+                        </div>
+
+                        <div class="contact-card" id="link-channel">
+                            <div class="contact-info">
+                                <span class="contact-icon">🍷</span>
+                                <div>
+                                    <div style="font-weight:700; font-size:13px;">Официальный канал WineSquad</div>
+                                    <div style="font-size:11.5px; color:var(--accent);">t.me/WineSquad</div>
+                                </div>
+                            </div>
+                            <span style="font-size:16px; color:var(--text-dim);">↗</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/renderer.js"></script>
+</body>
+</html>
