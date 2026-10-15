@@ -212,7 +212,7 @@ jobs:
             - **Превью-скриншоты macOS**: протестировано через Playwright и включено в дистрибутив.
 
             ### 💬 Обратная связь и автор:
-            - **Автор**: NanoDev_mc (NanoDev1488)
+            - **Автор**: NanoDev
             - **Обратная связь**: [t.me/radoqi](https://t.me/radoqi)
             - **Telegram канал**: [t.me/WineSquad](https://t.me/WineSquad)
           files: release-files/*

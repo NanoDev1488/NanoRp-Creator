@@ -246,49 +246,56 @@ function fallbackValidatePack(dirPath) {
 }
 
 // Free public host uploaders (No API key needed)
-// 1) Catbox Litterbox / Catbox (permanent or long retention)
-// 2) 0x0.st
-// 3) file.io
-async function uploadToPublicHost(filePath, provider = 'catbox') {
+// 1) TmpFiles.org (Instant direct binary download link)
+// 2) Catbox.moe (Permanent direct hosting)
+// 3) File.io
+async function uploadToPublicHost(filePath, provider = 'tmpfiles') {
     const fileName = path.basename(filePath);
     const fileData = fs.readFileSync(filePath);
     const sha1 = await computeFileSha1(filePath);
 
     if (provider === 'catbox') {
         try {
-            // Catbox Litterbox API: https://litterbox.catbox.moe/resources/internals/api.php
-            // time=72h or permanent through catbox.moe
-            return await uploadLitterbox(fileName, fileData, sha1);
+            return await uploadCatbox(fileName, fileData, sha1);
         } catch (e) {
-            console.warn('[Upload] Catbox error, falling back to 0x0.st:', e.message);
-            return await upload0x0(fileName, fileData, sha1);
+            console.warn('[Upload] Catbox error, falling back to TmpFiles:', e.message);
+            return await uploadTmpfiles(fileName, fileData, sha1);
         }
-    } else if (provider === '0x0') {
-        return await upload0x0(fileName, fileData, sha1);
+    } else if (provider === 'tmpfiles') {
+        try {
+            return await uploadTmpfiles(fileName, fileData, sha1);
+        } catch (e) {
+            console.warn('[Upload] TmpFiles error, falling back to Catbox:', e.message);
+            return await uploadCatbox(fileName, fileData, sha1);
+        }
     } else {
-        return await uploadFileIo(fileName, fileData, sha1);
+        try {
+            return await uploadTmpfiles(fileName, fileData, sha1);
+        } catch (e) {
+            return await uploadFileIo(fileName, fileData, sha1);
+        }
     }
 }
 
-function uploadLitterbox(fileName, fileData, sha1) {
+function uploadCatbox(fileName, fileData, sha1) {
     return new Promise((resolve, reject) => {
         const boundary = '----WebKitFormBoundary' + crypto.randomBytes(16).toString('hex');
         const header = Buffer.from(
             `--${boundary}\r\nContent-Disposition: form-data; name="reqtype"\r\n\r\nfileupload\r\n` +
-            `--${boundary}\r\nContent-Disposition: form-data; name="time"\r\n\r\n72h\r\n` +
             `--${boundary}\r\nContent-Disposition: form-data; name="fileToUpload"; filename="${fileName}"\r\nContent-Type: application/zip\r\n\r\n`
         );
         const footer = Buffer.from(`\r\n--${boundary}--\r\n`);
         const payload = Buffer.concat([header, fileData, footer]);
 
         const req = https.request({
-            hostname: 'litterbox.catbox.moe',
-            path: '/resources/internals/api.php',
+            hostname: 'catbox.moe',
+            path: '/user/api.php',
             method: 'POST',
+            timeout: 12000,
             headers: {
                 'Content-Type': `multipart/form-data; boundary=${boundary}`,
                 'Content-Length': payload.length,
-                'User-Agent': 'NanoRp-Creator/1.0'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
             }
         }, (res) => {
             let body = '';
@@ -298,24 +305,25 @@ function uploadLitterbox(fileName, fileData, sha1) {
                 if (url.startsWith('http')) {
                     resolve({
                         success: true,
-                        provider: 'Litterbox (Catbox)',
+                        provider: 'Catbox.moe (Permanent Direct)',
                         url,
                         sha1,
                         direct_url: url
                     });
                 } else {
-                    reject(new Error(body || 'Unknown upload response'));
+                    reject(new Error(body || 'Catbox upload error'));
                 }
             });
         });
 
+        req.on('timeout', () => { req.destroy(new Error('Catbox connection timed out')); });
         req.on('error', reject);
         req.write(payload);
         req.end();
     });
 }
 
-function upload0x0(fileName, fileData, sha1) {
+function uploadTmpfiles(fileName, fileData, sha1) {
     return new Promise((resolve, reject) => {
         const boundary = '----WebKitFormBoundary' + crypto.randomBytes(16).toString('hex');
         const header = Buffer.from(
@@ -325,33 +333,41 @@ function upload0x0(fileName, fileData, sha1) {
         const payload = Buffer.concat([header, fileData, footer]);
 
         const req = https.request({
-            hostname: '0x0.st',
-            path: '/',
+            hostname: 'tmpfiles.org',
+            path: '/api/v1/upload',
             method: 'POST',
+            timeout: 15000,
             headers: {
                 'Content-Type': `multipart/form-data; boundary=${boundary}`,
                 'Content-Length': payload.length,
-                'User-Agent': 'NanoRp-Creator/1.0'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
             }
         }, (res) => {
             let body = '';
             res.on('data', d => body += d);
             res.on('end', () => {
-                const url = body.trim();
-                if (url.startsWith('http')) {
-                    resolve({
-                        success: true,
-                        provider: '0x0.st',
-                        url,
-                        sha1,
-                        direct_url: url
-                    });
-                } else {
-                    reject(new Error(body || 'Failed to upload to 0x0.st'));
+                try {
+                    const data = JSON.parse(body);
+                    if (data.status === 'success' && data.data && data.data.url) {
+                        const rawUrl = data.data.url;
+                        const directUrl = rawUrl.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+                        resolve({
+                            success: true,
+                            provider: 'TmpFiles.org (Direct Download)',
+                            url: directUrl,
+                            sha1,
+                            direct_url: directUrl
+                        });
+                    } else {
+                        reject(new Error(body || 'Failed to upload to TmpFiles'));
+                    }
+                } catch (e) {
+                    reject(new Error('Invalid response from TmpFiles: ' + body));
                 }
             });
         });
 
+        req.on('timeout', () => { req.destroy(new Error('TmpFiles connection timed out')); });
         req.on('error', reject);
         req.write(payload);
         req.end();

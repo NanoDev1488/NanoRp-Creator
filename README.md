@@ -16,6 +16,8 @@ Minecraft Java 1.6 — 1.21.x · Spigot · Paper · Purpur · Velocity · Fabric
 
 [📢 Telegram-канал обновлений WineSquad](https://t.me/WineSquad) · [💬 Обратная связь автора](https://t.me/radoqi)
 
+> 🚀 **Первое десктопное приложение автора (NanoDev)** на гибридном высокопроизводительном стеке Electron + Rust + C++17.
+
 </div>
 
 ---
@@ -131,4 +133,4 @@ npm run dist:mac       # для macOS
 
 - **Обратная связь и предложения**: [t.me/radoqi](https://t.me/radoqi)
 - **Канал обновлений WineSquad**: [t.me/WineSquad](https://t.me/WineSquad)
-- **Автор**: NanoDev (Nonames)
+- **Автор**: NanoDev
