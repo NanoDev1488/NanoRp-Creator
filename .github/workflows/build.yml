@@ -24,7 +24,7 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js (v20 LTS)
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -70,9 +70,15 @@ jobs:
           cargo build --release --manifest-path native/rust-engine/Cargo.toml
 
       - name: Compile C++ Engine (Release Profile)
+        shell: bash
         run: |
-          cmake -B native/cpp-engine/build -S native/cpp-engine -DCMAKE_BUILD_TYPE=Release
-          cmake --build native/cpp-engine/build --config Release
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            cmake -B native/cpp-engine/build -S native/cpp-engine -G "Visual Studio 17 2022" -A x64
+            cmake --build native/cpp-engine/build --config Release
+          else
+            cmake -B native/cpp-engine/build -S native/cpp-engine -DCMAKE_BUILD_TYPE=Release
+            cmake --build native/cpp-engine/build --config Release
+          fi
 
       - name: Copy Native Engines to Binary Directory
         shell: bash
