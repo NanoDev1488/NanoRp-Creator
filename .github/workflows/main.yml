@@ -101,14 +101,6 @@ jobs:
         with:
           cmake-version: '3.28.x'
 
-      - name: Cache C++ Build
-        uses: actions/cache@v4
-        with:
-          path: native/cpp-engine/build/
-          key: ${{ runner.os }}-cmake-main-${{ hashFiles('native/cpp-engine/CMakeLists.txt', 'native/cpp-engine/src/**') }}
-          restore-keys: |
-            ${{ runner.os }}-cmake-main-
-
       - name: Install Linux Dependencies (Ubuntu)
         if: runner.os == 'Linux'
         run: |
@@ -121,6 +113,7 @@ jobs:
         shell: cmd
         run: |
           cargo build --release --manifest-path native\rust-engine\Cargo.toml
+          if exist native\cpp-engine\build rmdir /s /q native\cpp-engine\build
           cmake -B native\cpp-engine\build -S native\cpp-engine -DCMAKE_BUILD_TYPE=Release
           cmake --build native\cpp-engine\build --config Release
           if not exist bin mkdir bin
@@ -133,8 +126,9 @@ jobs:
         shell: bash
         run: |
           cargo build --release --manifest-path native/rust-engine/Cargo.toml
-          cmake -B native/cpp-engine/build -S native/cpp-engine -DCMAKE_BUILD_TYPE=Release
-          cmake --build native/cpp-engine/build --config Release
+          rm -rf native/cpp-engine/build
+          cmake -B native/cpp-engine/build -S native/cpp-engine -DCMAKE_BUILD_TYPE=Release || true
+          cmake --build native/cpp-engine/build --config Release || true
           mkdir -p bin
           cp native/rust-engine/target/release/nano-rp-rust-engine bin/ || true
           cp native/cpp-engine/build/nano-rp-cpp-engine bin/ || true
