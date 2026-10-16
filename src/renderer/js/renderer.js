@@ -88,7 +88,11 @@ function renderMotdPreview(rawText) {
             currentColor = '#ffffff';
             isBold = false;
         } else if (part.length > 0) {
-            const safeText = part.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeText = part
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/ /g, '&nbsp;');
             html += `<span style="color: ${currentColor}; font-weight: ${isBold ? 'bold' : 'normal'};">${safeText}</span>`;
         }
     }
