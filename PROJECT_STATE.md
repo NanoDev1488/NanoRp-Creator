@@ -25,8 +25,10 @@
 - [x] Zero-dependency чистый PKZIP 2.0 движок с валидными DOS-метками времени и CRC32.
 - [x] Интеграция прямого потокового RAW-хостинга `paste.c-net.org` (без капч и блокировок в СНГ).
 - [x] Иконка приложения и инсталлера NSIS в Windows.
-- [x] CI/CD в GitHub Actions для Windows, Linux, macOS.
-- [x] Релиз NanoRp-Creator.exe на рабочем столе пользователя.
+- [x] Полноценная поддержка Drag & Drop через `webUtils.getPathForFile` (поддержка папок и файлов).
+- [x] Экстремальная оптимизация ОЗУ (NetworkService in-process, V8 `--lite-mode`, лимит процессов).
+- [x] Официальный релиз v1.0.0 опубликован на GitHub с 8 артефактами (Windows exe, Linux AppImage, macOS DMG, zip).
+- [x] Свежий NanoRp-Creator.exe (68.1 МБ) обновлен на рабочем столе.
 
 ## 4. Правила окружения
 - Windows 10, 4 ГБ ОЗУ, слабый процессор: сборка только через cmd, никакого PowerShell.
