@@ -14,9 +14,11 @@ app.commandLine.appendSwitch('disable-component-update');
 app.commandLine.appendSwitch('disable-domain-reliability');
 app.commandLine.appendSwitch('disable-sync');
 app.commandLine.appendSwitch('disable-background-networking');
-app.commandLine.appendSwitch('disable-renderer-backgrounding');
-app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion,AutofillServerCommunication,CertificateTransparencyComponentUpdater,Translate');
-app.commandLine.appendSwitch('js-flags', '--max-old-space-size=96 --expose-gc');
+app.commandLine.appendSwitch('renderer-process-limit', '1');
+app.commandLine.appendSwitch('disable-site-isolation-trials');
+app.commandLine.appendSwitch('enable-features', 'NetworkServiceInProcess');
+app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion,AutofillServerCommunication,CertificateTransparencyComponentUpdater,Translate,NetworkService');
+app.commandLine.appendSwitch('js-flags', '--max-old-space-size=36 --optimize_for_size --expose-gc --lite-mode');
 
 let mainWindow = null;
 
@@ -328,12 +330,31 @@ ipcMain.handle('shell:open-external', async (_, url) => {
     return true;
 });
 
-// System memory stats
+// Check if path is directory
+ipcMain.handle('fs:is-directory', async (_, p) => {
+    try {
+        return fs.existsSync(p) && fs.statSync(p).isDirectory();
+    } catch {
+        return false;
+    }
+});
+
+// System memory stats across all processes
 ipcMain.handle('app:get-stats', async () => {
+    let totalWorkingSetKB = 0;
+    try {
+        const metrics = app.getAppMetrics();
+        for (const m of metrics) {
+            totalWorkingSetKB += (m.memory && m.memory.workingSetSize) ? m.memory.workingSetSize : 0;
+        }
+    } catch {}
+
     const mem = process.memoryUsage();
+    const finalMB = totalWorkingSetKB > 0 ? Math.round(totalWorkingSetKB / 1024) : Math.round(mem.rss / 1024 / 1024);
+
     return {
         heapUsedMB: Math.round(mem.heapUsed / 1024 / 1024),
-        rssMB: Math.round(mem.rss / 1024 / 1024),
+        rssMB: finalMB,
         platform: process.platform,
         arch: process.arch,
         rustActive: !!nativeBridge.getBinaryPath('nano-rp-rust-engine'),

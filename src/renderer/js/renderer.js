@@ -589,8 +589,35 @@ window.addEventListener('drop', async (e) => {
 
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const filePath = file.path;
+        const filePath = (window.api && window.api.getPathForFile)
+            ? window.api.getPathForFile(file)
+            : (file.path || '');
         if (!filePath) continue;
+
+        const isDir = (window.api && window.api.isDirectory)
+            ? await window.api.isDirectory(filePath)
+            : false;
+
+        if (isDir) {
+            currentPackDir = filePath;
+            const folderName = filePath.split(/[\\/]/).pop();
+            const btnSpan = document.getElementById('btn-select-folder').querySelector('span');
+            if (btnSpan) btnSpan.textContent = folderName;
+            document.getElementById('btn-select-folder').title = filePath;
+
+            // Auto-scan directory textures
+            const images = await window.api.scanDirectoryImages(filePath);
+            for (const img of images) {
+                const norm = img.path.toLowerCase().replace(/\\/g, '/');
+                if (!parityImages.some(p => p.path.toLowerCase().replace(/\\/g, '/') === norm)) {
+                    parityImages.push(img);
+                }
+            }
+            renderParityTable();
+            const parityTab = document.querySelector('[data-page="page-parity"]');
+            if (parityTab) parityTab.click();
+            continue;
+        }
 
         const ext = filePath.split('.').pop().toLowerCase();
         if (ext === 'png' || ext === 'jpg' || ext === 'jpeg') {
@@ -601,7 +628,6 @@ window.addEventListener('drop', async (e) => {
                     parityImages.push(info);
                 }
             }
-            // Navigate to parity page if not already there
             const parityTab = document.querySelector('[data-page="page-parity"]');
             if (parityTab && !parityTab.classList.contains('active')) parityTab.click();
         } else if (ext === 'json') {
