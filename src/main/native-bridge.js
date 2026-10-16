@@ -34,13 +34,15 @@ console.log('[NativeBridge] C++ Engine binary:', cppBin || 'JS Fallback Active')
 
 // Fast PNG Header inspector (Reads width & height from PNG IHDR chunk without heavy deps)
 function inspectPng(filePath) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         fs.open(filePath, 'r', (err, fd) => {
-            if (err) return reject(err);
+            if (err) return resolve({ success: false, valid: false, error: err.message });
             const buffer = Buffer.alloc(32);
-            fs.read(fd, buffer, 0, 32, 0, (readErr) => {
+            fs.read(fd, buffer, 0, 32, 0, (readErr, bytesRead) => {
                 fs.close(fd, () => {});
-                if (readErr) return reject(readErr);
+                if (readErr || bytesRead < 24) {
+                    return resolve({ valid: false, error: 'Файл слишком мал или повреждён' });
+                }
 
                 // PNG signature: 89 50 4E 47 0D 0A 1A 0A
                 if (buffer.readUInt32BE(0) !== 0x89504E47 || buffer.readUInt32BE(4) !== 0x0D0A1A0A) {
@@ -207,6 +209,11 @@ async function fallbackZip(sourceDir, outputZip) {
             const central = [];
             let offset = 0;
 
+            const now = new Date();
+            const dosTime = ((now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1)) & 0xFFFF;
+            const dosDate = (((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate()) & 0xFFFF;
+            const dosTimestamp = ((dosDate << 16) | dosTime) >>> 0;
+
             for (const entry of entries) {
                 const nameBuf = Buffer.from(entry.rel.replace(/\\/g, '/'), 'utf8');
                 const compressed = zlib.deflateRawSync(entry.data, { level: 9 });
@@ -218,7 +225,7 @@ async function fallbackZip(sourceDir, outputZip) {
                 lh.writeUInt16LE(20, 4);          // Version needed (2.0)
                 lh.writeUInt16LE(0x0800, 6);      // UTF-8 flag
                 lh.writeUInt16LE(8, 8);           // Deflate compression
-                lh.writeUInt32LE(0, 10);          // Mod time
+                lh.writeUInt32LE(dosTimestamp, 10); // Real DOS Mod time & date
                 lh.writeUInt32LE(crc, 14);        // CRC-32
                 lh.writeUInt32LE(compressed.length, 18); // Compressed size
                 lh.writeUInt32LE(entry.data.length, 22); // Uncompressed size
@@ -234,7 +241,7 @@ async function fallbackZip(sourceDir, outputZip) {
                 cd.writeUInt16LE(20, 6);          // Version needed
                 cd.writeUInt16LE(0x0800, 8);      // UTF-8 flag
                 cd.writeUInt16LE(8, 10);          // Deflate compression
-                cd.writeUInt32LE(0, 12);          // Mod time
+                cd.writeUInt32LE(dosTimestamp, 12); // Real DOS Mod time & date
                 cd.writeUInt32LE(crc, 16);        // CRC-32
                 cd.writeUInt32LE(compressed.length, 20); // Compressed size
                 cd.writeUInt32LE(entry.data.length, 24); // Uncompressed size
@@ -315,7 +322,7 @@ function fallbackValidatePack(dirPath) {
             } else {
                 total_files++;
                 const rel = path.relative(dirPath, full).replace(/\\/g, '/');
-                if (/[A-Z\s]/.test(rel)) {
+                if (rel.toLowerCase().startsWith('assets/') && /[A-Z\s]/.test(rel)) {
                     invalid_paths.push(rel);
                 }
             }
@@ -387,7 +394,7 @@ function uploadCNet(fileName, fileData, sha1) {
             res.on('data', d => body += d);
             res.on('end', () => {
                 const url = body.trim();
-                if (url.startsWith('http')) {
+                if (res.statusCode >= 200 && res.statusCode < 300 && url.startsWith('http')) {
                     resolve({
                         success: true,
                         provider: 'paste.c-net.org (Direct Stream)',
@@ -396,7 +403,7 @@ function uploadCNet(fileName, fileData, sha1) {
                         direct_url: url
                     });
                 } else {
-                    reject(new Error(body || 'Failed to upload to paste.c-net.org'));
+                    reject(new Error(`c-net HTTP ${res.statusCode}: ${body || 'Failed to upload'}`));
                 }
             });
         });

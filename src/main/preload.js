@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('api', {
     inspectImage: (imagePath) => ipcRenderer.invoke('pack:inspect-image', imagePath),
     fixImage: (inputPath, outputPath) => ipcRenderer.invoke('pack:fix-image', { inputPath, outputPath }),
     validatePack: (packDir) => ipcRenderer.invoke('pack:validate', packDir),
+    scanDirectoryImages: (dirPath) => ipcRenderer.invoke('pack:scan-directory-images', dirPath),
     generatePack: (packData) => ipcRenderer.invoke('pack:generate', packData),
     createZip: (sourceDir, outputZip) => ipcRenderer.invoke('pack:create-zip', { sourceDir, outputZip }),
     uploadCloud: (filePath, provider) => ipcRenderer.invoke('pack:upload-cloud', { filePath, provider }),

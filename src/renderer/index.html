@@ -116,6 +116,28 @@
             <div class="control-group">
               <label class="control-label" for="inp-pack-desc">Описание (MOTD / Цветовые коды)</label>
               <textarea id="inp-pack-desc" class="textarea-field" placeholder="§bNanoRp Server Pack §7by §eWineSquad">§bNanoRp Server Pack §7by §eWineSquad</textarea>
+              <div class="motd-palette">
+                <span class="color-chip" data-code="&0" style="background: #000000; color: #ffffff;">&0</span>
+                <span class="color-chip" data-code="&1" style="background: #0000aa; color: #ffffff;">&1</span>
+                <span class="color-chip" data-code="&2" style="background: #00aa00; color: #ffffff;">&2</span>
+                <span class="color-chip" data-code="&3" style="background: #00aaaa; color: #ffffff;">&3</span>
+                <span class="color-chip" data-code="&4" style="background: #aa0000; color: #ffffff;">&4</span>
+                <span class="color-chip" data-code="&5" style="background: #aa00aa; color: #ffffff;">&5</span>
+                <span class="color-chip" data-code="&6" style="background: #ffaa00; color: #000000;">&6</span>
+                <span class="color-chip" data-code="&7" style="background: #aaaaaa; color: #000000;">&7</span>
+                <span class="color-chip" data-code="&8" style="background: #555555; color: #ffffff;">&8</span>
+                <span class="color-chip" data-code="&9" style="background: #5555ff; color: #ffffff;">&9</span>
+                <span class="color-chip" data-code="&a" style="background: #55ff55; color: #000000;">&a</span>
+                <span class="color-chip" data-code="&b" style="background: #55ffff; color: #000000;">&b</span>
+                <span class="color-chip" data-code="&c" style="background: #ff5555; color: #ffffff;">&c</span>
+                <span class="color-chip" data-code="&d" style="background: #ff55ff; color: #000000;">&d</span>
+                <span class="color-chip" data-code="&e" style="background: #ffff55; color: #000000;">&e</span>
+                <span class="color-chip" data-code="&f" style="background: #ffffff; color: #000000;">&f</span>
+                <span class="color-chip" data-code="&l" style="background: #334155; color: #ffffff; font-weight: 900;">&l Bold</span>
+                <span class="color-chip" data-code="&r" style="background: #1e293b; color: #94a3b8;">&r Сброс</span>
+              </div>
+              <div class="control-label" style="margin-top: 4px;">Предпросмотр в игре:</div>
+              <div id="motd-preview" class="motd-preview-box"></div>
             </div>
           </div>
 
@@ -184,10 +206,17 @@
               <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               <span>Расширить все нечётные (+1px)</span>
             </button>
+            <button id="btn-clear-parity" class="btn btn-secondary btn-sm" style="display: none;">
+              <span>Очистить</span>
+            </button>
           </div>
         </header>
 
         <div class="table-panel">
+          <div class="table-toolbar">
+            <input type="text" id="inp-parity-search" class="table-search-input" placeholder="Поиск текстуры по имени файла или пути...">
+            <span id="lbl-parity-count" style="font-size: 11px; color: var(--ink-secondary); font-family: var(--font-mono); white-space: nowrap;">0 файлов</span>
+          </div>
           <table class="data-table">
             <thead>
               <tr>
@@ -214,6 +243,11 @@
           <div class="view-title-group">
             <h1>Замена символов на глифы (Шрифты)</h1>
             <p>Привязка текстовых меток и эмодзи к текстурам через <code>font/default.json</code> для чата, скорбордов и таба</p>
+          </div>
+          <div class="header-actions">
+            <button id="btn-clear-fonts" class="btn btn-secondary btn-sm" style="display: none;">
+              <span>Очистить все</span>
+            </button>
           </div>
         </header>
 
@@ -253,6 +287,11 @@
           <div class="view-title-group">
             <h1>Кастомные предметы (CustomModelData)</h1>
             <p>Связывание базового предмета Minecraft с кастомной моделью без ручной правки overrides JSON</p>
+          </div>
+          <div class="header-actions">
+            <button id="btn-clear-items" class="btn btn-secondary btn-sm" style="display: none;">
+              <span>Очистить все</span>
+            </button>
           </div>
         </header>
 

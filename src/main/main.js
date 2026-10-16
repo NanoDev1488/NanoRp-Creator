@@ -109,6 +109,39 @@ ipcMain.handle('pack:inspect-image', async (_, imagePath) => {
     return await nativeBridge.checkImage(imagePath);
 });
 
+// Scan all images recursively in a directory
+ipcMain.handle('pack:scan-directory-images', async (_, dirPath) => {
+    try {
+        if (!dirPath || !fs.existsSync(dirPath)) return [];
+        const imagePaths = [];
+
+        function scan(d) {
+            const entries = fs.readdirSync(d, { withFileTypes: true });
+            for (const e of entries) {
+                const full = path.join(d, e.name);
+                if (e.isDirectory()) {
+                    scan(full);
+                } else if (e.isFile() && /\.(png|jpe?g)$/i.test(e.name)) {
+                    imagePaths.push(full);
+                }
+            }
+        }
+        scan(dirPath);
+
+        const results = [];
+        for (const imgPath of imagePaths) {
+            const inspected = await nativeBridge.checkImage(imgPath);
+            if (inspected && inspected.success) {
+                results.push(inspected);
+            }
+        }
+        return results;
+    } catch (e) {
+        console.error('Directory scan error:', e);
+        return [];
+    }
+});
+
 // Fix image parity (odd size fix)
 ipcMain.handle('pack:fix-image', async (_, { inputPath, outputPath }) => {
     return await nativeBridge.fixImage(inputPath, outputPath);
@@ -119,23 +152,50 @@ ipcMain.handle('pack:validate', async (_, packDir) => {
     return await nativeBridge.validatePack(packDir);
 });
 
+// Helper: Check if base item is a handheld weapon/tool
+function isHandheldItem(baseName) {
+    const handheldKeywords = ['sword', 'pickaxe', 'axe', 'shovel', 'hoe', 'fishing_rod', 'shears', 'bow', 'crossbow', 'trident'];
+    return handheldKeywords.some(keyword => baseName.includes(keyword));
+}
+
 // Generate resource pack folder structure, mcmeta, font or model overrides
 ipcMain.handle('pack:generate', async (_, packData) => {
     try {
         const { targetDir, name, description, packFormat, items, fonts } = packData;
 
+        if (!targetDir) {
+            return { success: false, error: 'Директория пакета не указана' };
+        }
+
         if (!fs.existsSync(targetDir)) {
             fs.mkdirSync(targetDir, { recursive: true });
         }
 
-        // 1. Generate pack.mcmeta
+        // 1. Generate pack.mcmeta with modern supported_formats and &->§ formatting
+        const pFormat = parseInt(packFormat, 10) || 34;
+        const formattedDesc = (description || name || 'Created with NanoRp-Creator')
+            .replace(/&([0-9a-fk-orA-FK-OR])/g, '§$1');
+
         const mcmeta = {
             pack: {
-                pack_format: parseInt(packFormat, 10) || 15,
-                description: description || name || 'Created with NanoRp-Creator'
+                pack_format: pFormat,
+                supported_formats: {
+                    min_inclusive: Math.min(pFormat, 15),
+                    max_inclusive: Math.max(pFormat, 48)
+                },
+                description: formattedDesc
             }
         };
         fs.writeFileSync(path.join(targetDir, 'pack.mcmeta'), JSON.stringify(mcmeta, null, 2), 'utf-8');
+
+        // Copy default pack.png if none exists
+        const targetPackPng = path.join(targetDir, 'pack.png');
+        if (!fs.existsSync(targetPackPng)) {
+            const defaultIcon = path.join(__dirname, '..', 'renderer', 'assets', 'icon.png');
+            if (fs.existsSync(defaultIcon)) {
+                try { fs.copyFileSync(defaultIcon, targetPackPng); } catch {}
+            }
+        }
 
         // 2. Base Minecraft directories
         const assetsDir = path.join(targetDir, 'assets', 'minecraft');
@@ -154,29 +214,44 @@ ipcMain.handle('pack:generate', async (_, packData) => {
         for (const it of (items || [])) {
             if (!it.baseItem || !it.imagePath) continue;
 
-            const base = it.baseItem.toLowerCase().trim();
-            const safeName = (it.customName || path.basename(it.imagePath, path.extname(it.imagePath)))
+            // Strip 'minecraft:' namespace if present and sanitize
+            let base = it.baseItem.toLowerCase().trim();
+            if (base.startsWith('minecraft:')) base = base.substring(10);
+            base = base.replace(/[^a-z0-9_]/g, '_');
+
+            const ext = path.extname(it.imagePath).toLowerCase();
+            const safeName = (it.customName || path.basename(it.imagePath, ext))
                 .toLowerCase().replace(/[^a-z0-9_]/g, '_');
 
-            // Copy texture
-            const destTexture = path.join(texturesItemDir, `${safeName}.png`);
-            if (fs.existsSync(it.imagePath)) {
-                fs.copyFileSync(it.imagePath, destTexture);
+            const is3DJsonModel = (ext === '.json');
+
+            if (is3DJsonModel) {
+                // Blockbench / 3D model JSON: copy directly to models/item/
+                const customModelPath = path.join(modelsItemDir, `${safeName}.json`);
+                if (fs.existsSync(it.imagePath)) {
+                    fs.copyFileSync(it.imagePath, customModelPath);
+                }
+            } else {
+                // 2D Texture PNG: copy to textures/item/ and create generated item model
+                const destTexture = path.join(texturesItemDir, `${safeName}.png`);
+                if (fs.existsSync(it.imagePath)) {
+                    fs.copyFileSync(it.imagePath, destTexture);
+                }
+
+                const customModelPath = path.join(modelsItemDir, `${safeName}.json`);
+                const customModelJson = {
+                    parent: isHandheldItem(base) ? 'item/handheld' : 'item/generated',
+                    textures: {
+                        layer0: `minecraft:item/${safeName}`
+                    }
+                };
+                fs.writeFileSync(customModelPath, JSON.stringify(customModelJson, null, 2), 'utf-8');
             }
 
-            // Create individual item model
-            const customModelPath = path.join(modelsItemDir, `${safeName}.json`);
-            const customModelJson = {
-                parent: 'item/generated',
-                textures: {
-                    layer0: `minecraft:item/${safeName}`
-                }
-            };
-            fs.writeFileSync(customModelPath, JSON.stringify(customModelJson, null, 2), 'utf-8');
-
             if (!itemGroups[base]) itemGroups[base] = [];
+            const cmdVal = isNaN(parseInt(it.cmd, 10)) ? 1 : parseInt(it.cmd, 10);
             itemGroups[base].push({
-                predicate: { custom_model_data: parseInt(it.cmd, 10) || 1 },
+                predicate: { custom_model_data: cmdVal },
                 model: `item/${safeName}`
             });
         }
@@ -184,12 +259,21 @@ ipcMain.handle('pack:generate', async (_, packData) => {
         // Write master overrides for each base item
         for (const [baseItem, overrides] of Object.entries(itemGroups)) {
             const masterModelPath = path.join(modelsItemDir, `${baseItem}.json`);
+            // Deduplicate overrides by CustomModelData (keep latest)
+            const cmdMap = new Map();
+            for (const ov of overrides) {
+                cmdMap.set(ov.predicate.custom_model_data, ov);
+            }
+            const sortedOverrides = Array.from(cmdMap.values()).sort(
+                (a, b) => a.predicate.custom_model_data - b.predicate.custom_model_data
+            );
+
             const masterModelJson = {
-                parent: 'item/handheld',
+                parent: isHandheldItem(baseItem) ? 'item/handheld' : 'item/generated',
                 textures: {
                     layer0: `minecraft:item/${baseItem}`
                 },
-                overrides: overrides.sort((a, b) => a.predicate.custom_model_data - b.predicate.custom_model_data)
+                overrides: sortedOverrides
             };
             fs.writeFileSync(masterModelPath, JSON.stringify(masterModelJson, null, 2), 'utf-8');
         }
@@ -204,12 +288,16 @@ ipcMain.handle('pack:generate', async (_, packData) => {
                 fs.copyFileSync(f.imagePath, destFontTex);
             }
 
+            // Decode unicode escape strings like "\uE001" to actual unicode character
+            let cleanSymbol = f.symbol;
+            cleanSymbol = cleanSymbol.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+
             fontProviders.push({
                 type: 'bitmap',
                 file: `minecraft:font/${safeFontName}`,
-                ascent: parseInt(f.ascent, 10) || 7,
-                height: parseInt(f.height, 10) || 8,
-                chars: [f.symbol]
+                ascent: isNaN(parseInt(f.ascent, 10)) ? 7 : parseInt(f.ascent, 10),
+                height: isNaN(parseInt(f.height, 10)) ? 8 : parseInt(f.height, 10),
+                chars: [cleanSymbol]
             });
         }
 
